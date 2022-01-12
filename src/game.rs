@@ -75,13 +75,4 @@ mod new_game {
         let expected_error = "Can't play in position 0, as it has been already played.".to_string();
         assert_eq!(game.error, Some(expected_error))
     }
-
-    #[test]
-    fn error_when_playing_in_taken_position_1() {
-        let mut game = Game::new();
-        game.play(1);
-        game.play(1);
-        let expected_error = "Can't play in position 1, as it has been already played.".to_string();
-        assert_eq!(game.error, Some(expected_error))
-    }
 }
