@@ -31,18 +31,18 @@ impl Game {
         if !self.is_valid_move(&space) {
             self.set_move_error(&space);
         } else {
-            self.board.play(space, active_marker);
+            self.board.play(space, &active_marker);
         }
         if self.board.is_full() {
             self.is_over = true;
         }
-        if self.is_winning_play(&space, active_marker) {
+        if self.is_winning_play(&space, &active_marker) {
             self.winner = Some(active_marker);
             self.is_over = true;
         }
     }
 
-    fn is_winning_play(&self, space: &u8, marker: PlayMarkers) -> bool {
+    fn is_winning_play(&self, space: &u8, marker: &PlayMarkers) -> bool {
         let mut is_position_winning_play = false;
         for winning_spaces in self.winning_plays.get(&space) {
             if self.is_marker_in_all_positions(winning_spaces, marker) {
@@ -53,10 +53,10 @@ impl Game {
         is_position_winning_play
     }
 
-    fn is_marker_in_all_positions(&self, winning_play: &[u8; 3], marker: PlayMarkers) -> bool {
+    fn is_marker_in_all_positions(&self, winning_play: &[u8; 3], marker: &PlayMarkers) -> bool {
         let mut did_play_all_position = true;
         for space in winning_play {
-            if self.board.get_space_marker(space) != Some(&marker) {
+            if self.board.get_space_marker(space) != Some(marker) {
                 did_play_all_position = false;
                 break;
             }
@@ -72,7 +72,7 @@ impl Game {
         }
     }
     fn is_valid_move(&self, space: &u8) -> bool {
-        if self.is_over || self.board.is_space_played(space) { true } else { false }
+        if !self.is_over && !self.board.is_space_played(space) { true } else { false }
     }
 
     fn set_move_error(&mut self, space: &u8) {
@@ -84,7 +84,6 @@ impl Game {
             self.error = Some(error);
         }
     }
-}
 }
 
 #[cfg(test)]
