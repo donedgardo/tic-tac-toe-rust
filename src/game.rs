@@ -28,9 +28,8 @@ impl Game {
 
     pub fn play(&mut self, space: u8) {
         let active_marker = self.get_active_marker();
-        if self.board.is_space_played(&space) {
-            let error = format!("Can't play in position {}, as it has been already played.", space);
-            self.error = Some(error);
+        if !self.is_valid_move(&space) {
+            self.set_move_error(&space);
         } else {
             self.board.play(space, active_marker);
         }
@@ -72,6 +71,20 @@ impl Game {
             PlayMarkers::O
         }
     }
+    fn is_valid_move(&self, space: &u8) -> bool {
+        if self.is_over || self.board.is_space_played(space) { true } else { false }
+    }
+
+    fn set_move_error(&mut self, space: &u8) {
+        if self.is_over {
+            let error = "Can't play after game is over.".to_string();
+            self.error = Some(error);
+        } else if self.board.is_space_played(&space) {
+            let error = format!("Can't play in position {}, as it has been already played.", space);
+            self.error = Some(error);
+        }
+    }
+}
 }
 
 #[cfg(test)]
@@ -170,6 +183,27 @@ mod new_game {
             game.play(space);
         }
         assert_eq!(game.is_over, true);
+    }
+
+    #[test]
+    fn error_when_playing_after_game_over() {
+        let mut game = Game::new();
+        for space in [0, 3, 1, 4, 2] {
+            game.play(space);
+        }
+        game.play(5);
+        let expected_error = "Can't play after game is over.".to_string();
+        assert_eq!(game.error, Some(expected_error))
+    }
+
+    #[test]
+    fn game_stays_the_same_after_playing_game_over() {
+        let mut game = Game::new();
+        for space in [0, 3, 1, 4, 2] {
+            game.play(space);
+        }
+        game.play(5);
+        assert_eq!(game.board.get_space_marker(&5), None)
     }
 
     // #[test]
