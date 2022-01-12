@@ -1,10 +1,12 @@
 use crate::board::Board;
+use crate::play_markers::PlayMarkers;
 
 #[derive(Debug)]
 pub struct Game {
     is_over: bool,
     board: Board,
     error: Option<String>,
+    winner: Option<PlayMarkers>,
 }
 
 impl Game {
@@ -13,6 +15,7 @@ impl Game {
             is_over: false,
             board: Board::new(),
             error: None,
+            winner: None,
         }
     }
 
@@ -33,6 +36,8 @@ impl Game {
 mod new_game {
     use crate::game::Game;
     use crate::play_markers::PlayMarkers;
+
+    const CATS_GAME: [u8; 9] = [0, 4, 2, 1, 7, 5, 3, 6, 8];
 
     #[test]
     fn is_not_over() {
@@ -82,10 +87,18 @@ mod new_game {
     #[test]
     fn cats_game_is_over() {
         let mut game = Game::new();
-        const CATS_GAME: [u8; 9] = [0, 4, 2, 1, 7, 5, 3, 6, 8];
         for space in CATS_GAME  {
             game.play(space);
         }
         assert!(game.is_over);
+    }
+
+    #[test]
+    fn cats_game_has_no_winner() {
+        let mut game = Game::new();
+        for space in CATS_GAME  {
+            game.play(space);
+        }
+        assert_eq!(game.winner, None);
     }
 }
