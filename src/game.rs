@@ -1,10 +1,9 @@
-use std::collections::HashMap;
-use crate::play_markers::PlayMarkers;
+use crate::board::Board;
 
 #[derive(Debug)]
 pub struct Game {
     is_over: bool,
-    board: HashMap<u8, PlayMarkers>,
+    board: Board,
     error: Option<String>,
 }
 
@@ -12,39 +11,27 @@ impl Game {
     pub fn new() -> Self {
         Self {
             is_over: false,
-            board: HashMap::new(),
+            board: Board::new(),
             error: None,
         }
     }
 
     pub fn play(&mut self, space: u8) {
-        if self.board.contains_key(&space) {
+        if self.board.is_space_played(&space) {
             let error = format!("Can't play in position {}, as it has been already played.", space);
             self.error = Some(error);
         } else {
-            self.play_board_space(space)
+            self.board.play(space)
         }
-        if self.is_board_full() {
+        if self.board.is_full() {
             self.is_over = true;
-        }
-    }
-
-    fn is_board_full(&mut self) -> bool {
-        self.board.len() == 9
-    }
-
-    fn play_board_space(&mut self, space: u8) {
-        if self.board.len() % 2 == 0 {
-            self.board.insert(space, PlayMarkers::X);
-        } else {
-            self.board.insert(space, PlayMarkers::O);
         }
     }
 }
 
 #[cfg(test)]
 mod new_game {
-    use crate::game::{Game};
+    use crate::game::Game;
     use crate::play_markers::PlayMarkers;
 
     #[test]
@@ -64,7 +51,7 @@ mod new_game {
     fn x_plays_first() {
         let mut game = Game::new();
         game.play(0);
-        assert_eq!(game.board.get(&0), Some(&PlayMarkers::X));
+        assert_eq!(game.board.get_space_marker(&0), Some(&PlayMarkers::X));
     }
 
     #[test]
@@ -72,7 +59,7 @@ mod new_game {
         let mut game = Game::new();
         game.play(0);
         game.play(1);
-        assert_eq!(game.board.get(&1), Some(&PlayMarkers::O));
+        assert_eq!(game.board.get_space_marker(&1), Some(&PlayMarkers::O));
     }
 
     #[test]
@@ -89,7 +76,7 @@ mod new_game {
         let mut game = Game::new();
         game.play(0);
         game.play(0);
-        assert_eq!(game.board.get(&0), Some(&PlayMarkers::X))
+        assert_eq!(game.board.get_space_marker(&0), Some(&PlayMarkers::X))
     }
 
     #[test]
