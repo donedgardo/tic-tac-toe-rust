@@ -16,6 +16,7 @@ impl Game {
             error: None,
         }
     }
+
     pub fn play(&mut self, space: u8) {
         if self.board.contains_key(&space) {
             let error = format!("Can't play in position {}, as it has been already played.", space);
@@ -23,6 +24,13 @@ impl Game {
         } else {
             self.play_board_space(space)
         }
+        if self.is_board_full() {
+            self.is_over = true;
+        }
+    }
+
+    fn is_board_full(&mut self) -> bool {
+        self.board.len() == 9
     }
 
     fn play_board_space(&mut self, space: u8) {
@@ -68,11 +76,29 @@ mod new_game {
     }
 
     #[test]
-    fn error_when_playing_in_taken_position_0() {
+    fn error_when_playing_in_taken_position() {
         let mut game = Game::new();
         game.play(0);
         game.play(0);
         let expected_error = "Can't play in position 0, as it has been already played.".to_string();
         assert_eq!(game.error, Some(expected_error))
+    }
+
+    #[test]
+    fn board_unchanged_after_playing_in_taken_position() {
+        let mut game = Game::new();
+        game.play(0);
+        game.play(0);
+        assert_eq!(game.board.get(&0), Some(&PlayMarkers::X))
+    }
+
+    #[test]
+    fn cats_game_is_over() {
+        let mut game = Game::new();
+        const CATS_GAME: [u8; 9] = [0, 4, 2, 1, 7, 5, 3, 6, 8];
+        for space in CATS_GAME  {
+            game.play(space);
+        }
+        assert!(game.is_over);
     }
 }
