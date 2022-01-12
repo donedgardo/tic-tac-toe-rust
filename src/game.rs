@@ -7,7 +7,7 @@ pub struct Game {
     board: Board,
     error: Option<String>,
     winner: Option<PlayMarkers>,
-    winning_plays: HashMap<u8, [u8;3]>,
+    winning_plays: HashMap<u8, [u8; 3]>,
 }
 
 impl Game {
@@ -39,8 +39,8 @@ impl Game {
         }
         if self.is_winning_play(&space, active_marker) {
             self.winner = Some(active_marker);
+            self.is_over = true;
         }
-
     }
 
     fn is_winning_play(&self, space: &u8, marker: PlayMarkers) -> bool {
@@ -52,7 +52,6 @@ impl Game {
             }
         }
         is_position_winning_play
-
     }
 
     fn is_marker_in_all_positions(&self, winning_play: &[u8; 3], marker: PlayMarkers) -> bool {
@@ -130,7 +129,7 @@ mod new_game {
     #[test]
     fn cats_game_is_over() {
         let mut game = Game::new();
-        for space in CATS_GAME  {
+        for space in CATS_GAME {
             game.play(space);
         }
         assert!(game.is_over);
@@ -139,7 +138,7 @@ mod new_game {
     #[test]
     fn cats_game_has_no_winner() {
         let mut game = Game::new();
-        for space in CATS_GAME  {
+        for space in CATS_GAME {
             game.play(space);
         }
         assert_eq!(game.winner, None);
@@ -149,7 +148,7 @@ mod new_game {
     #[test]
     fn x_wins_top_horizontal() {
         let mut game = Game::new();
-        for space in  [0, 3, 1, 4 ,2] {
+        for space in [0, 3, 1, 4, 2] {
             game.play(space);
         }
         assert_eq!(game.winner, Some(PlayMarkers::X));
@@ -158,10 +157,36 @@ mod new_game {
     #[test]
     fn o_wins_top_horizontal() {
         let mut game = Game::new();
-        for space in  [3, 0, 4, 1, 5 ,2] {
+        for space in [3, 0, 4, 1, 5, 2] {
             game.play(space);
         }
         assert_eq!(game.winner, Some(PlayMarkers::O));
     }
 
+    #[test]
+    fn is_over_after_win() {
+        let mut game = Game::new();
+        for space in [0, 3, 1, 4, 2] {
+            game.play(space);
+        }
+        assert_eq!(game.is_over, true);
+    }
+
+    // #[test]
+    // fn x_wins_middle_horizontal() {
+    //     let mut game = Game::new();
+    //     for space in  [0, 3, 1, 4 ,2] {
+    //         game.play(space);
+    //     }
+    //     assert_eq!(game.winner, Some(PlayMarkers::X));
+    // }
+    //
+    // #[test]
+    // fn o_wins_middle_horizontal() {
+    //     let mut game = Game::new();
+    //     for space in  [3, 0, 4, 1, 5 ,2] {
+    //         game.play(space);
+    //     }
+    //     assert_eq!(game.winner, Some(PlayMarkers::O));
+    // }
 }
