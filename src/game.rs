@@ -1,28 +1,24 @@
 use std::collections::HashMap;
 use crate::board::Board;
 use crate::play_markers::PlayMarkers;
+use crate::winning_plays;
 
 pub struct Game {
-    is_over: bool,
     board: Board,
     error: Option<String>,
+    is_over: bool,
     winner: Option<PlayMarkers>,
-    winning_plays: HashMap<u8, [u8; 3]>,
+    winning_plays: HashMap<u8, Vec<[u8; 3]>>,
 }
 
 impl Game {
     pub fn new() -> Self {
-        const TOP_HORIZONTAL: [u8; 3] = [0, 1, 2];
-        let mut winning_plays = HashMap::new();
-        winning_plays.insert(0, TOP_HORIZONTAL);
-        winning_plays.insert(1, TOP_HORIZONTAL);
-        winning_plays.insert(2, TOP_HORIZONTAL);
         Self {
-            is_over: false,
             board: Board::new(),
             error: None,
+            is_over: false,
             winner: None,
-            winning_plays,
+            winning_plays: winning_plays::get_winning_plays(),
         }
     }
 
@@ -44,11 +40,14 @@ impl Game {
 
     fn is_winning_play(&self, space: &u8, marker: &PlayMarkers) -> bool {
         let mut is_position_winning_play = false;
-        for winning_spaces in self.winning_plays.get(&space) {
-            if self.is_marker_in_all_positions(winning_spaces, marker) {
-                is_position_winning_play = true;
-                break;
+        'win_loop: for winning_plays in self.winning_plays.get(&space) {
+            for winning_spaces in winning_plays {
+                if self.is_marker_in_all_positions(winning_spaces, marker) {
+                    is_position_winning_play = true;
+                    break 'win_loop;
+                }
             }
+
         }
         is_position_winning_play
     }
@@ -158,21 +157,37 @@ mod new_game {
 
 
     #[test]
-    fn x_wins_top_horizontal() {
-        let mut game = Game::new();
-        for space in [0, 3, 1, 4, 2] {
-            game.play(space);
+    fn x_wins_any_position() {
+        let games_where_x_wins: [[u8; 5]; 8] = [
+            [0, 3, 1, 4, 2], [3, 1, 4, 2, 5],
+            [6, 1, 7, 3, 8], [0, 1, 3, 2, 6],
+            [1, 6, 4, 5, 7], [2, 1, 5, 6, 8],
+            [0, 1, 4, 2, 8], [2, 3, 4, 5, 6],
+        ];
+        for game_play in games_where_x_wins {
+            let mut game = Game::new();
+            for space in game_play {
+                game.play(space);
+            }
+            assert_eq!(game.winner, Some(PlayMarkers::X));
         }
-        assert_eq!(game.winner, Some(PlayMarkers::X));
     }
 
     #[test]
-    fn o_wins_top_horizontal() {
-        let mut game = Game::new();
-        for space in [3, 0, 4, 1, 5, 2] {
-            game.play(space);
+    fn o_wins_any_position() {
+        let games_where_o_wins: [[u8; 6]; 8] = [
+            [5, 0, 3, 1, 8, 2], [6, 3, 1, 4, 2, 5],
+            [5, 6, 1, 7, 3, 8], [5, 0, 1, 3, 2, 6],
+            [3, 1, 6, 4, 5, 7], [3, 2, 1, 5, 6, 8],
+            [3, 0, 1, 4, 2, 8], [1, 2, 3, 4, 5, 6],
+        ];
+        for game_play in games_where_o_wins {
+            let mut game = Game::new();
+            for space in game_play {
+                game.play(space);
+            }
+            assert_eq!(game.winner, Some(PlayMarkers::O));
         }
-        assert_eq!(game.winner, Some(PlayMarkers::O));
     }
 
     #[test]
@@ -204,22 +219,4 @@ mod new_game {
         game.play(5);
         assert_eq!(game.board.get_space_marker(&5), None)
     }
-
-    // #[test]
-    // fn x_wins_middle_horizontal() {
-    //     let mut game = Game::new();
-    //     for space in  [0, 3, 1, 4 ,2] {
-    //         game.play(space);
-    //     }
-    //     assert_eq!(game.winner, Some(PlayMarkers::X));
-    // }
-    //
-    // #[test]
-    // fn o_wins_middle_horizontal() {
-    //     let mut game = Game::new();
-    //     for space in  [3, 0, 4, 1, 5 ,2] {
-    //         game.play(space);
-    //     }
-    //     assert_eq!(game.winner, Some(PlayMarkers::O));
-    // }
 }
