@@ -50,6 +50,7 @@ impl CLIGameManager {
             output += &self.error.as_ref().unwrap().as_str();
         }
         output += "Enter number: \n";
+        println!("{}", output);
         let _result = writeln!(writer, "{}", output);
     }
 
@@ -90,10 +91,13 @@ impl CLIGameManager {
     }
 
     fn set_move_error(&mut self, space: &u8) {
-        if self.game.board.is_space_played(&space) {
-            let error = format!("Error: Can't play in position {}, as it has been already played.\n", space);
-            self.error = Some(error);
+        let mut error = String::new();
+        if &space > &&(8u8) {
+            error = format!("Error: {} is not valid.\n", space);
+        } else if self.game.board.is_space_played(&space) {
+            error = format!("Error: Can't play in position {}, as it has been already played.\n", space);
         }
+        self.error = Some(error);
     }
 }
 
@@ -127,6 +131,16 @@ mod cli_game {
         let mut output = Vec::new();
         cli.print(&mut output);
         assert_eq!(output, b"_|_|_\n_|_|_\n_|_|_\nX's turn!\nAvailable spaces in order from left to right and top to bottom: 0, 1, 2, 3, 4, 5, 6, 7, 8.\nError: -1 is not valid.\nEnter number: \n\n");
+    }
+
+    #[test]
+    fn should_print_error_on_out_of_range_input() {
+        let mut cli = CLIGameManager::new();
+        let input = b"9";
+        cli.input_play(&input[..]);
+        let mut output = Vec::new();
+        cli.print(&mut output);
+        assert_eq!(output, b"_|_|_\n_|_|_\n_|_|_\nX's turn!\nAvailable spaces in order from left to right and top to bottom: 0, 1, 2, 3, 4, 5, 6, 7, 8.\nError: 9 is not valid.\nEnter number: \n\n");
     }
 
     #[test]

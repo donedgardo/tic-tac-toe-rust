@@ -74,8 +74,9 @@ impl Game {
         }
         plays
     }
+
     fn is_valid_move(&self, space: &u8) -> bool {
-        if !self.is_over && !self.board.is_space_played(space) { true } else { false }
+        if !self.is_over && !self.board.is_space_played(space) && &space < &&9u8 { true } else { false }
     }
 }
 
