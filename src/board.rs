@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 use crate::play_markers::PlayMarkers;
 
-#[derive(Debug)]
 pub struct Board {
     pub(crate) spaces: HashMap<u8, PlayMarkers>,
 }

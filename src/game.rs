@@ -4,9 +4,9 @@ use crate::play_markers::PlayMarkers;
 use crate::winning_plays;
 
 pub struct Game {
-    board: Board,
+    pub(crate) board: Board,
     error: Option<String>,
-    is_over: bool,
+    pub(crate) is_over: bool,
     winner: Option<PlayMarkers>,
     winning_plays: HashMap<u8, Vec<[u8; 3]>>,
 }
@@ -47,7 +47,6 @@ impl Game {
                     break 'win_loop;
                 }
             }
-
         }
         is_position_winning_play
     }
@@ -63,12 +62,20 @@ impl Game {
         did_play_all_position
     }
 
-    fn get_active_marker(&self) -> PlayMarkers {
+    pub(crate) fn get_active_marker(&self) -> PlayMarkers {
         if self.board.spaces.len() % 2 == 0 {
             PlayMarkers::X
         } else {
             PlayMarkers::O
         }
+    }
+
+    pub fn get_available_plays(&self) -> Vec<u8> {
+        let mut plays = Vec::new();
+        for p in 0u8..9u8 {
+            if self.is_valid_move(&p) { plays.push(p); }
+        }
+        plays
     }
     fn is_valid_move(&self, space: &u8) -> bool {
         if !self.is_over && !self.board.is_space_played(space) { true } else { false }
