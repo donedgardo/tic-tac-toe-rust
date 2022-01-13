@@ -65,7 +65,7 @@ impl CLIGameManager {
         turn_display
     }
 
-    pub fn format_board_display(&self) -> String {
+    fn format_board_display(&self) -> String {
         let mut board_display = String::new();
         for space in 1..10 {
             let marker = &self.game.board.get_space_marker(&(space - 1));
