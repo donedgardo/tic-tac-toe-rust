@@ -5,17 +5,16 @@ use crate::winning_plays;
 
 pub struct Game {
     pub(crate) board: Board,
-    error: Option<String>,
     pub(crate) is_over: bool,
     winner: Option<PlayMarkers>,
     winning_plays: HashMap<u8, Vec<[u8; 3]>>,
 }
 
+
 impl Game {
     pub fn new() -> Self {
         Self {
             board: Board::new(),
-            error: None,
             is_over: false,
             winner: None,
             winning_plays: winning_plays::get_winning_plays(),
@@ -24,9 +23,7 @@ impl Game {
 
     pub fn play(&mut self, space: u8) {
         let active_marker = self.get_active_marker();
-        if !self.is_valid_move(&space) {
-            self.set_move_error(&space);
-        } else {
+        if self.is_valid_move(&space) {
             self.board.play(space, &active_marker);
         }
         if self.board.is_full() {
@@ -80,16 +77,6 @@ impl Game {
     fn is_valid_move(&self, space: &u8) -> bool {
         if !self.is_over && !self.board.is_space_played(space) { true } else { false }
     }
-
-    fn set_move_error(&mut self, space: &u8) {
-        if self.is_over {
-            let error = "Can't play after game is over.".to_string();
-            self.error = Some(error);
-        } else if self.board.is_space_played(&space) {
-            let error = format!("Can't play in position {}, as it has been already played.", space);
-            self.error = Some(error);
-        }
-    }
 }
 
 #[cfg(test)]
@@ -125,15 +112,6 @@ mod new_game {
         game.play(0);
         game.play(1);
         assert_eq!(game.board.get_space_marker(&1), Some(&PlayMarkers::O));
-    }
-
-    #[test]
-    fn error_when_playing_in_taken_position() {
-        let mut game = Game::new();
-        game.play(0);
-        game.play(0);
-        let expected_error = "Can't play in position 0, as it has been already played.".to_string();
-        assert_eq!(game.error, Some(expected_error))
     }
 
     #[test]
@@ -204,17 +182,6 @@ mod new_game {
             game.play(space);
         }
         assert_eq!(game.is_over, true);
-    }
-
-    #[test]
-    fn error_when_playing_after_game_over() {
-        let mut game = Game::new();
-        for space in [0, 3, 1, 4, 2] {
-            game.play(space);
-        }
-        game.play(5);
-        let expected_error = "Can't play after game is over.".to_string();
-        assert_eq!(game.error, Some(expected_error))
     }
 
     #[test]
