@@ -31,7 +31,7 @@ impl CLIGameManager {
             space = match s.parse::<u8>() {
                 Ok(n) => Some(n),
                 Err(_) => {
-                    self.error = Some(format!("{} is not valid.\n", s));
+                    self.error = Some(format!("Error: {} is not valid.\n", s));
                     break;
                 }
             };
@@ -50,7 +50,6 @@ impl CLIGameManager {
             output += &self.error.as_ref().unwrap().as_str();
         }
         output += "Enter number: \n";
-        println!("{}", output);
         let _result = writeln!(writer, "{}", output);
     }
 
@@ -91,11 +90,8 @@ impl CLIGameManager {
     }
 
     fn set_move_error(&mut self, space: &u8) {
-        if self.game.is_over {
-            let error = "Can't play after game is over.".to_string();
-            self.error = Some(error);
-        } else if self.game.board.is_space_played(&space) {
-            let error = format!("Can't play in position {}, as it has been already played.", space);
+        if self.game.board.is_space_played(&space) {
+            let error = format!("Error: Can't play in position {}, as it has been already played.\n", space);
             self.error = Some(error);
         }
     }
@@ -130,7 +126,19 @@ mod cli_game {
         cli.input_play(&input[..]);
         let mut output = Vec::new();
         cli.print(&mut output);
-        assert_eq!(output, b"_|_|_\n_|_|_\n_|_|_\nX's turn!\nAvailable spaces in order from left to right and top to bottom: 0, 1, 2, 3, 4, 5, 6, 7, 8.\n-1 is not valid.\nEnter number: \n\n");
+        assert_eq!(output, b"_|_|_\n_|_|_\n_|_|_\nX's turn!\nAvailable spaces in order from left to right and top to bottom: 0, 1, 2, 3, 4, 5, 6, 7, 8.\nError: -1 is not valid.\nEnter number: \n\n");
+    }
+
+    #[test]
+    fn should_print_error_on_playing_occupied_space() {
+        let mut cli = CLIGameManager::new();
+        let input = b"0";
+        cli.input_play(&input[..]);
+        let input = b"0";
+        cli.input_play(&input[..]);
+        let mut output = Vec::new();
+        cli.print(&mut output);
+        assert_eq!(output, b"X|_|_\n_|_|_\n_|_|_\nO's turn!\nAvailable spaces in order from left to right and top to bottom: 1, 2, 3, 4, 5, 6, 7, 8.\nError: Can't play in position 0, as it has been already played.\nEnter number: \n\n");
     }
 }
 
