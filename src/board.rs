@@ -12,6 +12,13 @@ impl Board {
         }
     }
 
+    pub fn copy(&self) -> Self {
+        Self {
+            spaces: self.spaces.clone(),
+        }
+    }
+
+
     pub fn play(&mut self, space: u8, marker: &PlayMarkers) {
         self.spaces.insert(space, *marker);
     }

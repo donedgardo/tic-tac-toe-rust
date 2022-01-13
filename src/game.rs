@@ -3,13 +3,13 @@ use crate::board::Board;
 use crate::play_markers::PlayMarkers;
 use crate::winning_plays;
 
+
 pub struct Game {
     pub(crate) board: Board,
     pub(crate) is_over: bool,
     winner: Option<PlayMarkers>,
     winning_plays: HashMap<u8, Vec<[u8; 3]>>,
 }
-
 
 impl Game {
     pub fn new() -> Self {
@@ -20,6 +20,16 @@ impl Game {
             winning_plays: winning_plays::get_winning_plays(),
         }
     }
+
+    pub fn copy(&self) -> Self {
+        Self {
+            board: self.board.copy(),
+            is_over: self.is_over,
+            winner: self.winner,
+            winning_plays: winning_plays::get_winning_plays(),
+        }
+    }
+
 
     pub fn play(&mut self, space: u8) {
         let active_marker = self.get_active_marker();
@@ -33,6 +43,26 @@ impl Game {
             self.winner = Some(active_marker);
             self.is_over = true;
         }
+    }
+
+    pub fn get_active_marker(&self) -> PlayMarkers {
+        if self.board.spaces.len() % 2 == 0 {
+            PlayMarkers::X
+        } else {
+            PlayMarkers::O
+        }
+    }
+
+    pub fn get_winner(&self) -> Option<PlayMarkers> {
+        self.winner
+    }
+
+    pub fn get_available_plays(&self) -> Vec<u8> {
+        let mut plays = Vec::new();
+        for p in 0u8..9u8 {
+            if self.is_valid_move(&p) { plays.push(p); }
+        }
+        plays
     }
 
     fn is_winning_play(&self, space: &u8, marker: &PlayMarkers) -> bool {
@@ -59,21 +89,6 @@ impl Game {
         did_play_all_position
     }
 
-    pub(crate) fn get_active_marker(&self) -> PlayMarkers {
-        if self.board.spaces.len() % 2 == 0 {
-            PlayMarkers::X
-        } else {
-            PlayMarkers::O
-        }
-    }
-
-    pub fn get_available_plays(&self) -> Vec<u8> {
-        let mut plays = Vec::new();
-        for p in 0u8..9u8 {
-            if self.is_valid_move(&p) { plays.push(p); }
-        }
-        plays
-    }
 
     fn is_valid_move(&self, space: &u8) -> bool {
         if !self.is_over && !self.board.is_space_played(space) && &space < &&9u8 { true } else { false }
