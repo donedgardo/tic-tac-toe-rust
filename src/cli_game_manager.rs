@@ -19,7 +19,7 @@ impl CLIGameManager {
     pub fn start<R, W>(&mut self, mut reader: R, mut writer: W) where R: BufRead, W: Write {
         while !self.game.is_over {
             self.print(&mut writer);
-            let space = self.input_play(&mut reader);
+            self.input_play(&mut reader);
         }
     }
 
@@ -38,19 +38,31 @@ impl CLIGameManager {
 
     pub fn print<W>(&self, mut writer: W) where W: Write {
         let mut output = self.format_board_display();
-        let marker = if self.game.get_active_marker() == PlayMarkers::X { "X" } else { "O" };
-        output += marker;
-        output += "'s turn!\n";
+        output += &*self.active_turn_display();
+        output += &*self.available_plays_display();
+        output += "Enter number: \n";
+        let _result = writeln!(writer, "{}", output);
+    }
+
+    fn available_plays_display(&self) -> String {
+        let mut display = String::new();
         let available_plays = self.game.get_available_plays();
         let mut available_plays_formatted = Vec::new();
         for play in available_plays {
             available_plays_formatted.push(play.to_string())
         }
-        output += "Available spaces in order from left to right and top to bottom: ";
-        output += &*available_plays_formatted.join(", ");
-        output += ".\n";
-        output += "Enter number: \n";
-        let _result = writeln!(writer, "{}", output);
+        display += "Available spaces in order from left to right and top to bottom: ";
+        display += &*available_plays_formatted.join(", ");
+        display += ".\n";
+        display
+    }
+
+    fn active_turn_display(&self) -> String {
+        let mut turn_display = String::new();
+        let marker = if self.game.get_active_marker() == PlayMarkers::X { "X" } else { "O" };
+        turn_display += marker;
+        turn_display += "'s turn!\n";
+        turn_display
     }
 
     pub fn format_board_display(&self) -> String {
