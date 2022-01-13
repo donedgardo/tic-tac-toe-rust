@@ -1,7 +1,7 @@
 use clap::Parser;
 use std::io;
 use crate::game::Game;
-use crate::cli_game_manager::CLIGameManager;
+use crate::cli_game_manager::{CLIGameManager, GameMode};
 use crate::play_markers::PlayMarkers;
 
 mod game;
@@ -14,15 +14,14 @@ mod ai;
 
 #[derive(Parser, PartialEq)]
 struct Cli {
-    // Whether player goes first.
-    #[clap(long, parse(try_from_str), default_value_t = true)]
-    first: bool,
+    // Whether to play against "ai-first", "ai-last" or "local"
+    #[clap(arg_enum, default_value_t = GameMode::AiLast)]
+    mode: GameMode,
 }
 
 fn main() {
-    let _args = Cli::parse();
-    let mut cli_game = CLIGameManager::new();
-
+    let args = Cli::parse();
+    let mut cli_game = CLIGameManager::new(args.mode);
     let stdio = io::stdin();
     let reader = stdio.lock();
     let writer = io::stdout();

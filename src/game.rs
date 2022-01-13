@@ -65,6 +65,10 @@ impl Game {
         plays
     }
 
+    pub fn is_valid_move(&self, space: &u8) -> bool {
+        if !self.is_over && !self.board.is_space_played(space) && &space < &&9u8 { true } else { false }
+    }
+
     fn is_winning_play(&self, space: &u8, marker: &PlayMarkers) -> bool {
         let mut is_position_winning_play = false;
         'win_loop: for winning_plays in self.winning_plays.get(&space) {
@@ -90,9 +94,7 @@ impl Game {
     }
 
 
-    fn is_valid_move(&self, space: &u8) -> bool {
-        if !self.is_over && !self.board.is_space_played(space) && &space < &&9u8 { true } else { false }
-    }
+
 }
 
 #[cfg(test)]
@@ -112,7 +114,7 @@ mod new_game {
     fn has_empty_board() {
         let game = Game::new();
         let board = game.board;
-        assert!(board.is_empty())
+        assert!(board.spaces.is_empty())
     }
 
     #[test]

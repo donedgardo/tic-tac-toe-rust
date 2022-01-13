@@ -36,6 +36,10 @@ pub fn get_best_move(game: &Game) -> u8 {
 
 fn minimax(game: &Game, player_mark: PlayMarkers, depth: i32, is_maximizing: bool) -> i32 {
     let mut score = score_game(game, player_mark);
+    let new_depth = match is_maximizing {
+        true => depth + 1,
+        false => depth -1,
+    };
     let moves = game.get_available_plays();
     loop {
         // game ended so score the game.
@@ -50,7 +54,7 @@ fn minimax(game: &Game, player_mark: PlayMarkers, depth: i32, is_maximizing: boo
 
         let mut scores = Vec::new();
         for g in games {
-            scores.push(minimax(&g, player_mark, depth + 1, !is_maximizing))
+            scores.push(minimax(&g, player_mark, new_depth, !is_maximizing))
         }
         if is_maximizing {
             let max_value = scores.iter().max();
@@ -108,6 +112,6 @@ mod ai_game {
         for play in [0, 4, 8] {
             game.play(play);
         }
-        assert_eq!(get_best_move(&game), 5)
+        assert!(vec![1u8, 3u8, 5u8, 7u8].contains(&get_best_move(&game)))
     }
 }

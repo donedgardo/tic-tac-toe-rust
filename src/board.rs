@@ -18,17 +18,12 @@ impl Board {
         }
     }
 
-
     pub fn play(&mut self, space: u8, marker: &PlayMarkers) {
         self.spaces.insert(space, *marker);
     }
 
     pub fn is_full(&self) -> bool {
         self.spaces.len() == 9
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.spaces.is_empty()
     }
 
     pub fn is_space_played(&self, space: &u8) -> bool {

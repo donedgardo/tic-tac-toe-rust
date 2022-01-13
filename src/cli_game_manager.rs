@@ -1,22 +1,35 @@
 use std::io::{BufRead, Write};
+use crate::ai::get_best_move;
 use crate::Game;
 use crate::play_markers::PlayMarkers;
 
 
+#[derive(clap::ArgEnum, Clone, PartialEq)]
+pub enum GameMode {
+    AiFirst,
+    AiLast,
+    LOCAL,
+}
+
 pub struct CLIGameManager {
     game: Game,
     error: Option<String>,
+    mode: GameMode,
 }
 
 impl CLIGameManager {
-    pub fn new() -> Self {
+    pub fn new(mode: GameMode) -> Self {
         Self {
             game: Game::new(),
             error: None,
+            mode,
         }
     }
 
     pub fn start<R, W>(&mut self, mut reader: R, mut writer: W) where R: BufRead, W: Write {
+        if self.mode == GameMode::AiFirst {
+            self.ai_play();
+        }
         self.print(&mut writer);
         while !self.game.is_over {
             self.input_play(&mut reader);
@@ -38,8 +51,23 @@ impl CLIGameManager {
             };
         }
         if !space.is_none() {
-            self.set_move_error(&space.unwrap());
-            self.game.play(space.unwrap());
+            self.play(space.unwrap());
+        }
+    }
+
+    pub fn play(&mut self, space: u8) {
+        if !self.game.is_valid_move(&space) {
+            self.set_move_error(&space);
+            return;
+        }
+        match &self.mode {
+            GameMode::LOCAL => {
+                self.game.play(space);
+            }
+            GameMode::AiFirst | GameMode::AiLast => {
+                self.game.play(space);
+                if !self.game.is_over { self.ai_play(); }
+            }
         }
     }
 
@@ -125,15 +153,22 @@ impl CLIGameManager {
         if marker == &PlayMarkers::X { "X" } else { "O" }
     }
 
+    fn ai_play(&mut self) {
+        self.game.play(get_best_move(&self.game));
+    }
+}
+
+pub trait PlayManager {
+    fn play(&mut self, space: u8);
 }
 
 #[cfg(test)]
 mod cli_game {
-    use crate::cli_game_manager::CLIGameManager;
+    use crate::cli_game_manager::{CLIGameManager, GameMode};
 
     #[test]
     fn prints_welcome() {
-        let cli = CLIGameManager::new();
+        let cli = CLIGameManager::new(GameMode::LOCAL);
         let mut output = Vec::new();
         cli.print(&mut output);
         assert_eq!(output, b"_|_|_\n_|_|_\n_|_|_\nX's turn!\nAvailable spaces in order from left to right and top to bottom: 0, 1, 2, 3, 4, 5, 6, 7, 8.\nEnter number: \n\n");
@@ -141,7 +176,7 @@ mod cli_game {
 
     #[test]
     fn prints_after_play() {
-        let mut cli = CLIGameManager::new();
+        let mut cli = CLIGameManager::new(GameMode::LOCAL);
         let input = b"0";
         cli.input_play(&input[..]);
         let mut output = Vec::new();
@@ -151,7 +186,7 @@ mod cli_game {
 
     #[test]
     fn should_print_error_on_invalid_input() {
-        let mut cli = CLIGameManager::new();
+        let mut cli = CLIGameManager::new(GameMode::LOCAL);
         let input = b"-1";
         cli.input_play(&input[..]);
         let mut output = Vec::new();
@@ -161,7 +196,7 @@ mod cli_game {
 
     #[test]
     fn should_print_error_on_out_of_range_input() {
-        let mut cli = CLIGameManager::new();
+        let mut cli = CLIGameManager::new(GameMode::LOCAL);
         let input = b"9\n";
         cli.input_play(&input[..]);
         let mut output = Vec::new();
@@ -171,7 +206,7 @@ mod cli_game {
 
     #[test]
     fn should_print_error_on_playing_occupied_space() {
-        let mut cli = CLIGameManager::new();
+        let mut cli = CLIGameManager::new(GameMode::LOCAL);
         let input = b"0";
         cli.input_play(&input[..]);
         let input = b"0";
@@ -183,7 +218,7 @@ mod cli_game {
 
     #[test]
     fn should_print_winner() {
-        let mut cli = CLIGameManager::new();
+        let mut cli = CLIGameManager::new(GameMode::LOCAL);
         for play in ["0", "3", "1", "4", "2"] {
             let input = play.as_bytes();
             cli.input_play(&input[..]);
@@ -195,7 +230,7 @@ mod cli_game {
 
     #[test]
     fn should_print_game_over() {
-        let mut cli = CLIGameManager::new();
+        let mut cli = CLIGameManager::new(GameMode::LOCAL);
         for play in ["0", "4", "2", "1", "7", "5", "3", "6", "8"] {
             let input = play.as_bytes();
             cli.input_play(&input[..]);
