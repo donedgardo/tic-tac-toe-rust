@@ -13,18 +13,21 @@ For different options:
 ```
 
 ### Build
-Install rust-up to setup env with rust builder and cargo dependency manegement
+1. Install rust-up to setup env with rust builder and cargo dependency manegement
 Recommended:
 ```bash
 brew install rustup-init
 ```
+
+Or
 
 macOS, Linux or Unix-like OS:
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
-Then build with cargo
+ 
+2. Then build with cargo
 ```bash
 cargo build --release
 ```

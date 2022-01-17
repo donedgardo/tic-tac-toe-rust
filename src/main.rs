@@ -10,6 +10,7 @@ mod board;
 mod winning_plays;
 mod cli_game_manager;
 mod ai;
+mod ai2;
 
 
 #[derive(Parser, PartialEq)]

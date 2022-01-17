@@ -20,8 +20,8 @@ pub fn get_best_move(game: &Game) -> u8 {
             best_move = *moves.choose(&mut rand::thread_rng()).unwrap();
             break;
         } else if moves.is_empty() {
-            let thing = get_max_key(&scores);
-            best_move = *thing.unwrap();
+            let max_key = get_max_key(&scores);
+            best_move = *max_key.unwrap();
             break;
         } else {
             let play = moves.pop().unwrap();
