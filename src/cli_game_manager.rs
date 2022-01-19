@@ -1,8 +1,7 @@
 use std::io::{BufRead, Write};
-use crate::ai::get_best_move;
+use crate::ai2::get_best_move;
 use crate::Game;
 use crate::play_markers::PlayMarkers;
-
 
 #[derive(clap::ArgEnum, Clone, PartialEq)]
 pub enum GameMode {
